@@ -1,0 +1,136 @@
+name: ldap-sso-pocketid-stack
+
+services:
+  pki:
+    build:
+      context: ..
+      dockerfile: dockerfile/pki.Dockerfile
+    container_name: ldap-sso-pki
+    env_file:
+      - ../env/ldap-pocketid.env
+    volumes:
+      - pki_certs:/certs
+    restart: unless-stopped
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "test", "-f", "/certs/ca.crt"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  openldap:
+    build:
+      context: ..
+      dockerfile: dockerfile/openldap.Dockerfile
+    container_name: openldap-ldap-sso
+    hostname: ldap
+    depends_on:
+      pki:
+        condition: service_healthy
+    env_file:
+      - ../env/ldap-pocketid.env
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+      - pki_certs:/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "ldapsearch -x -H ldap://localhost:389 -s base -b '' dn >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - internal
+      - edge
+
+  phpldapadmin:
+    image: phpldapadmin/phpldapadmin:2.3.4
+    container_name: phpldapadmin-ldap-sso
+    depends_on:
+      pki:
+        condition: service_healthy
+      openldap:
+        condition: service_healthy
+    env_file:
+      - ../env/ldap-pocketid.env
+    ports:
+      - "9443:443"
+      - "8081:8080"
+    volumes:
+      - pki_certs:/certs:ro
+    networks:
+      - internal
+      - edge
+
+  pocket-id:
+    build:
+      context: ..
+      dockerfile: dockerfile/pocket-id.Dockerfile
+    container_name: pocket-id-ldap-sso
+    depends_on:
+      pki:
+        condition: service_healthy
+      openldap:
+        condition: service_healthy
+    restart: unless-stopped
+    env_file:
+      - ../env/ldap-pocketid.env
+    ports:
+      - 1411:1411
+    volumes:
+      - pocketid_data:/app/data
+      - pki_certs:/certs:ro
+    healthcheck:
+      test: [ "CMD", "/app/pocket-id", "healthcheck" ]
+      interval: 1m30s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    networks:
+      - internal
+      - edge
+
+  # tailscale:
+  #   image: tailscale/tailscale:latest
+  #   container_name: ldap-sso-tailscale
+  #   env_file:
+  #     - ../env/prod.tailscale.env
+  #   volumes:
+  #     - tailscale_state:/var/lib/tailscale
+  #     - /dev/net/tun:/dev/net/tun
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - SYS_MODULE
+  #   network_mode: host
+  #   command:
+  #     - /bin/sh
+  #     - -c
+  #     - |
+  #       tailscaled --state=/var/lib/tailscale/tailscaled.state &
+  #       sleep 5
+  #       tailscale up \
+  #         --authkey=$${TAILSCALE_AUTH_KEY} \
+  #         --hostname=$${TAILSCALE_HOSTNAME:-ldap-sso} \
+  #         --accept-dns=true \
+  #         $${TAILSCALE_TAGS:+--advertise-tags=$${TAILSCALE_TAGS}} \
+  #         $${TAILSCALE_ROUTES:+--advertise-routes=$${TAILSCALE_ROUTES}} \
+  #         $${TAILSCALE_EXTRA_ARGS}
+  #       tail -f /dev/null
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  edge:
+    driver: bridge
+
+volumes:
+  pocketid_data:
+  ldap_data:
+  ldap_config:
+#  tailscale_state:
+  pki_certs:
