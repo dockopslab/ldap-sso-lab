@@ -1,0 +1,9 @@
+version: 1
+dn: cn=example.group,ou=groups,dc=example,dc=local
+objectClass: top
+objectClass: groupOfNames
+objectClass: extensibleObject
+cn: example.group
+gidNumber: 2003
+member: uid=user.example,ou=people,dc=example,dc=local
+memberUid: user.example

@@ -1,0 +1,20 @@
+version: 1
+dn: uid=user.example,ou=people,dc=example,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: user.example
+cn: User Example
+sn: Example
+givenName: User
+displayName: User Example
+mail: user.example@example.local
+userPassword: {SSHA}REEMPLAZA_CON_HASH
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/users/user.example
+loginShell: /bin/bash
+shadowLastChange: 0
