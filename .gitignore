@@ -1,0 +1,18 @@
+# Environment overrides
+.env
+.env.*
+env/*.env
+!env/*-template.env
+
+# TLS/certificate artifacts
+certs/
+*.crt
+*.key
+*.csr
+*.srl
+
+# Docker data/overrides
+docker-compose.override.yml
+pocketid_data/
+ldap_data/
+ldap_config/
