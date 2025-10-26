@@ -129,9 +129,10 @@ You can also upload those LDIF templates through phpLDAPadmin (`phpldapadmin-lda
 
 ### Additional Guides
 
-- [`docs/pocketid.md`](docs/pocketid.md): Pocket ID-specific configuration tips, UI screenshots, and recommended flows.
-- [`docs/synology.md`](docs/synology.md): Notes for integrating Synology products with this LDAP/IdP stack.
-- [`docs/resources/`](docs/resources/): Images referenced by the guides (e.g., Pocket ID UI, Synology LDAP settings).
+| Guide | Description |
+| --- | --- |
+| [`docs/pocketid.md`](docs/pocketid.md) | Detailed Pocket ID configuration: reverse proxy, LDAP connector, claim mapping, and OIDC app setup. |
+| [`docs/synology.md`](docs/synology.md) | Steps to bind Synology DSM to the lab LDAP and enable SSO via Pocket ID. |
 
 Feel free to extend these documents with environment-specific steps or screenshots as you harden the stack for production use.
 
