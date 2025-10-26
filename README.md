@@ -35,13 +35,20 @@ Everything runs via Docker Compose, so you can iterate on schema, TLS, and IdP b
 
 ### Configure Environment Variables
 
-1. Copy the provided template and tailor it to your deployment:
+1. Clone the repository and move into it:
+
+   ```sh
+   git clone https://github.com/dockopslab/ldap-sso-lab.git
+   cd ldap-sso-lab
+   ```
+
+2. Copy the provided template and tailor it to your deployment:
 
    ```sh
    cp env/ldap-pocketid-template.env env/ldap-pocketid.env
    ```
 
-2. Open `env/ldap-pocketid.env` and review each section:
+3. Open `env/ldap-pocketid.env` and review each section:
 
    - **OpenLDAP**: Define `LDAP_DOMAIN`, admin credentials, ports, and TLS behavior. Set `LDAP_TLS_*` paths to `/certs/...` (they are mounted from the PKI container). Adjust base DN values to match your organization.
    - **phpLDAPadmin**: Update `LDAP_HOST`, port, and bind credentials if you changed them above. Keep `LDAP_SSL=true` when using LDAPS.
@@ -49,7 +56,7 @@ Everything runs via Docker Compose, so you can iterate on schema, TLS, and IdP b
    - **PKI**: Customize `PKI_CA_SUBJECT` and the per-service SAN values. You can provide multiple DNS/IP entries by comma-separating them (e.g., `PKI_LDAP_SAN_DNS=ldap.example.local,ldap`). Keep the literal `,ldap` suffix so the certificate also covers the Docker hostname used by Pocket ID when dialing `ldaps://ldap:636`.
    - **TailScale (optional)**: Fill out the auth key and route settings if you plan to expose the stack over Tailscale.
 
-3. Keep `env/ldap-pocketid.env` out of version control. The `.gitignore` already excludes `env/*.env` files except templates.
+4. Keep `env/ldap-pocketid.env` out of version control. The `.gitignore` already excludes `env/*.env` files except templates.
 
 ---
 
